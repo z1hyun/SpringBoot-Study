@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN">   <!--status의 속성값은 Log4j의 내부 이벤트 수준을 나타냄-->
+    <Properties>
+        <Property name="LOG_PATTERN"> <!--어펜더 설정에서 사용됨. -->
+            %d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 콘솔/터미널/명령행에 로그를 출력하도록 설정하는 콘솔어펜더 설정-->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern ="${LOG_PATTERN}"/>
+        </Console>
+            <!-- 정해진 로그 패턴을 사용하여 정해진 이름의 로그 파일에 로그를 출력하도록 설정 -->
+            <RollingFile name="FileAppender"
+                      fileName="logs/application-log4j2"
+                      filePattern="logs/application-log4j2-%d{yyyy-MM-dd}-%I.log">
+                    <PatternLayout>
+                        <Pattern>${LOG_PATTERN}</Pattern>
+                    </PatternLayout>
+                    <Polices>
+                        <SizeBasedTriggeringPolicy size="10MB" /> <!--크기가 10MB에 도달하면 로그파일 롤링을 수행하도록 설정-->
+                        <TimeBasedTriggeringPolicy interval="7" /> <!--로그파일 생성 후 7일이 되면 로그 롤링을 수행하도록 설정-->
+                    </Polices>
+                    <DefaultRolloverStrategy max="10" /> <!--최대 10개의 로그파일이 저장됨-->
+            </RollingFile>
+    </Appenders>
+    <Loggers>
+        <!-- com.manning.sbip 패키지 및 하위 패키지에서 발생하는 debug 레벨로그 파일 어펜더를 사용하여 출력하는 로거 생성-->
+        <Logger name="com.manning.sbip" level="debug" additivity="false">
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+        <!-- org.springframework.boot 패키지 및 하위 패키지에서 발생하는 info 레벨로그 파일 어펜더를 사용하여 출력하는 로거 생성-->
+        <Logger name="org.springframework.boot" level="info" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+        <!-- info레벨 전체 로그를 파일 어펜더와 콘솔 어펜더를 사용해서 출력하는 로거 설정-->
+        <Root level="info">
+            <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+        </Root>
+    </Loggers>
+</configuration>
