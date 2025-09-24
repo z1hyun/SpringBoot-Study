@@ -1,6 +1,7 @@
 package com.manning.sbip.ch02;
 
 import com.manning.sbip.ch02.model.Course;
+import com.manning.sbip.ch02.model.User;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -15,8 +16,6 @@ import java.util.Set;
 @SpringBootApplication
 public class CourseTrackerAppllication implements CommandLineRunner {
 
-    //빈 벨리데이션을 사용하는 스프링 부트 메인 클래스 생성
-
     private static Logger logger = LoggerFactory.getLogger(CourseTrackerAppllication.class);
 
     public static void main(String[] args) {
@@ -25,16 +24,31 @@ public class CourseTrackerAppllication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Course course = new Course();
-        course.setId(1);
-        course.setRating(0);  //rating이 0인 course 객체 생성 제약조건에 해당하지 않는값임.
 
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator(); //course 빈 객체의 유효성 검증하는 validator 인스턴스
+        //user2만 비밀번호 ㄱ제약에 부합하고 나머지는 부합하지않음.
 
-        Set<ConstraintViolation<Course>> violations = validator.validate(course);   //course 객체에 정의된 모든 제약사항 준수여부 검증 ,위반사항을 모아 반환.
+        User user1 = new User("sbip01", "sbip");
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<User>> violations = validator.validate(user1);
+        logger.error("Password for user1 do not adhere to the passsword policy");
+        violations.forEach(constraintViolation -> logger.error("Violation detailse: [{}]",constraintViolation.getMessage()));
 
-        violations.forEach(courseViolation -> //수집된 모든 제약 사항 위반 내용을 콘솔로그로 출력
-                logger.error("A constraint violation has occurred. Violation detailse: [{}]",courseViolation));
+        User user2 = new User("sbip02", "Sbip01$4UDfg");
+        violations = validator.validate(user2);
+        if (violations.isEmpty()) {
+            logger.info("Password for user2 adheres to the password policy");
+        }
+
+        User user3 = new User("sbip03", "Sbip01$4UDfgggg");
+        violations = validator.validate(user3);
+        logger.error("Password for user3 vioates maximum repetitve rule");
+        violations.forEach(constraintViolation -> logger.error("Violation detailse: [{}]",constraintViolation.getMessage()));
+
+        User user4 = new User("sbip04", "Sbip014UDfgggg");
+        violations = validator.validate(user3);
+        logger.error("Password for user4 vioates maximum repetitve rule");
+        violations.forEach(constraintViolation -> logger.error("Violation detailse: [{}]",constraintViolation.getMessage()));
+
 
 
     }
